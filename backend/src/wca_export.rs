@@ -15,7 +15,7 @@ pub async fn download_and_unzip(target_dir: &str) -> anyhow::Result<()> {
 }
 
 async fn download() -> anyhow::Result<Vec<u8>> {
-    let url = "https://www.worldcubeassociation.org/export/results/WCA_export.tsv";
+    let url = "https://www.worldcubeassociation.org/export/results/WCA_export.tsva";
     let mut response = reqwest::get(url).await?;
 
     if response.status().is_success() {
@@ -23,8 +23,11 @@ async fn download() -> anyhow::Result<Vec<u8>> {
         while let Some(chunk) = response.chunk().await? {
             bytes.extend_from_slice(&chunk);
         }
-        return Ok(bytes);
+        Ok(bytes)
+    } else {
+        Err(anyhow!(
+            "Server responded with status: {}",
+            response.status()
+        ))
     }
-
-    Err(anyhow!("Failed to download WCA export"))
 }
