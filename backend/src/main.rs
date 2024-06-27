@@ -1,8 +1,10 @@
-use actix_web::{App, HttpServer};
+use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
+use graph_type_validator::GraphTypeValidator;
 use log::{error, info};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
+mod graph_type_validator;
 mod services;
 mod wca_export;
 mod wca_sac;
@@ -48,8 +50,11 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
     wca_export_job_scheduler.start().await.unwrap();
 
-    HttpServer::new(|| {
+    let validator = web::Data::new(GraphTypeValidator::new());
+
+    HttpServer::new(move || {
         App::new()
+            .app_data(validator.clone())
             .service(services::get_graph)
             .service(services::get_events)
     })
