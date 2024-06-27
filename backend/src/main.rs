@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use graph_type_validator::GraphTypeValidator;
@@ -54,6 +55,8 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            // TODO remember to change it
+            .wrap(Cors::permissive())
             .app_data(validator.clone())
             .service(services::get_graph)
             .service(services::get_events)
