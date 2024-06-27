@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use tokio::process::Command;
 
 pub async fn generate_graph() -> anyhow::Result<()> {
@@ -13,7 +14,7 @@ pub async fn generate_graph() -> anyhow::Result<()> {
     if output.status.success() {
         Ok(())
     } else {
-        Err(anyhow::anyhow!(
+        Err(anyhow!(
             "Failed to generate graph: {}",
             String::from_utf8_lossy(&output.stderr)
         ))

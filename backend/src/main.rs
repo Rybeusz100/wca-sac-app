@@ -1,6 +1,6 @@
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
-use log::error;
+use log::{error, info};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 mod wca_export;
@@ -9,6 +9,24 @@ mod wca_sac;
 async fn wca_export_job() {
     if let Err(e) = wca_export::download_and_unzip("../WCA_SAC/data").await {
         error!("Failed to download and unzip WCA export: {}", e);
+    } else {
+        let entries = tokio::fs::read_dir("../WCA_SAC").await;
+        if let Ok(mut entries) = entries {
+            while let Ok(entry) = entries.next_entry().await {
+                if let Some(entry) = entry {
+                    if let Some(file_name) = entry.file_name().to_str() {
+                        if file_name.ends_with(".csv") || file_name.ends_with(".png") {
+                            tokio::fs::remove_file(entry.path())
+                                .await
+                                .unwrap_or_else(|e| {
+                                    error!("Failed to remove file {}: {}", file_name, e);
+                                });
+                        }
+                    }
+                }
+            }
+        }
+        info!("Removed old CSV and PNG files");
     }
 }
 
