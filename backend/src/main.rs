@@ -3,6 +3,7 @@ use dotenv::dotenv;
 use log::{error, info};
 use tokio_cron_scheduler::{Job, JobScheduler};
 
+mod services;
 mod wca_export;
 mod wca_sac;
 
@@ -12,16 +13,15 @@ async fn wca_export_job() {
     } else {
         let entries = tokio::fs::read_dir("../WCA_SAC").await;
         if let Ok(mut entries) = entries {
-            while let Ok(entry) = entries.next_entry().await {
-                if let Some(entry) = entry {
-                    if let Some(file_name) = entry.file_name().to_str() {
-                        if file_name.ends_with(".csv") || file_name.ends_with(".png") {
-                            tokio::fs::remove_file(entry.path())
-                                .await
-                                .unwrap_or_else(|e| {
-                                    error!("Failed to remove file {}: {}", file_name, e);
-                                });
-                        }
+            while let Ok(Some(entry)) = entries.next_entry().await {
+                if let Some(file_name) = entry.file_name().to_str() {
+                    if file_name.ends_with(".csv") || file_name.ends_with(".png") {
+                        info!("Removing file: {}", file_name);
+                        tokio::fs::remove_file(entry.path())
+                            .await
+                            .unwrap_or_else(|e| {
+                                error!("Failed to remove file {}: {}", file_name, e);
+                            });
                     }
                 }
             }
