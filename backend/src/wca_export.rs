@@ -15,7 +15,7 @@ pub async fn download_and_unzip(target_dir: &str) -> anyhow::Result<()> {
 }
 
 async fn download() -> anyhow::Result<Vec<u8>> {
-    let url = "https://www.worldcubeassociation.org/export/results/WCA_export.tsva";
+    let url = "https://www.worldcubeassociation.org/export/results/WCA_export.tsv";
     let mut response = reqwest::get(url).await?;
 
     if response.status().is_success() {

@@ -4,6 +4,7 @@ use log::error;
 use tokio_cron_scheduler::{Job, JobScheduler};
 
 mod wca_export;
+mod wca_sac;
 
 async fn wca_export_job() {
     if let Err(e) = wca_export::download_and_unzip("../WCA_SAC/data").await {
