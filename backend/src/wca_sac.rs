@@ -1,12 +1,12 @@
 use anyhow::anyhow;
 use tokio::process::Command;
 
-pub async fn generate_graph() -> anyhow::Result<()> {
+pub async fn generate_graph(graph_type: &str) -> anyhow::Result<()> {
     let output = Command::new("cmd")
         .arg("/C")
         .arg("python")
         .arg("create_graph.py")
-        .arg("333_A")
+        .arg(graph_type)
         .current_dir("../WCA_SAC")
         .output()
         .await?;
