@@ -48,8 +48,12 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
     wca_export_job_scheduler.start().await.unwrap();
 
-    HttpServer::new(|| App::new().service(services::get_graph))
-        .bind(("0.0.0.0", port))?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .service(services::get_graph)
+            .service(services::get_events)
+    })
+    .bind(("0.0.0.0", port))?
+    .run()
+    .await
 }

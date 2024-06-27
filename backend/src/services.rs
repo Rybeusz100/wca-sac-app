@@ -17,3 +17,8 @@ async fn get_graph(path: web::Path<String>) -> impl Responder {
         NamedFile::open_async(file_path).await
     }
 }
+
+#[get("/events")]
+async fn get_events() -> impl Responder {
+    NamedFile::open_async("./assets/events.json").await
+}
