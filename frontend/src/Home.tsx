@@ -117,18 +117,22 @@ function Home() {
             onChange={(e) => setSelectedRegion(e.target.value as string)}
           >
             <ListSubheader>Continent</ListSubheader>
-            {Object.entries(continents).map(([id, name]) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
+            {Object.entries(continents)
+              .sort((a, b) => a[1].localeCompare(b[1]))
+              .map(([id, name]) => (
+                <MenuItem key={id} value={id}>
+                  {name}
+                </MenuItem>
+              ))}
 
             <ListSubheader>Country</ListSubheader>
-            {Object.entries(countries).map(([id, name]) => (
-              <MenuItem key={id} value={id}>
-                {name}
-              </MenuItem>
-            ))}
+            {Object.entries(countries)
+              .sort((a, b) => a[1].localeCompare(b[1]))
+              .map(([id, name]) => (
+                <MenuItem key={id} value={id}>
+                  {name}
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
 
