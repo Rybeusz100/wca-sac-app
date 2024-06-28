@@ -18,6 +18,7 @@ function Home() {
   const areEventsLoading = useRef(false);
 
   const [selectedEvent, setSelectedEvent] = useState("");
+  const [selectedResultType, setSelectedResultType] = useState("");
 
   useEffect(() => {
     if (!areEventsLoading.current && !Object.keys(events).length) {
@@ -33,13 +34,13 @@ function Home() {
   }, []);
 
   function goToGraph() {
-    navigate(`/graph/${selectedEvent}_A`);
+    navigate(`/graph/${selectedEvent}_${selectedResultType}`);
   }
 
   return (
     <Container maxWidth="xs">
-      <Stack spacing={1} mt={2}>
-        <FormControl fullWidth>
+      <Stack spacing={2} mt={2}>
+        <FormControl disabled={!Object.keys(events).length}>
           <InputLabel id="event-select-label">Event</InputLabel>
           <Select
             id="event-select"
@@ -55,8 +56,21 @@ function Home() {
             ))}
           </Select>
         </FormControl>
+        <FormControl>
+          <InputLabel id="result-type-select-label">Result type</InputLabel>
+          <Select
+            id="result-type-select"
+            labelId="result-type-select-label"
+            label="Result type"
+            value={selectedResultType}
+            onChange={(e) => setSelectedResultType(e.target.value as string)}
+          >
+            <MenuItem value="S">Single</MenuItem>
+            <MenuItem value="A">Average</MenuItem>
+          </Select>
+        </FormControl>
         <Button
-          disabled={!selectedEvent}
+          disabled={!selectedEvent || !selectedResultType}
           onClick={goToGraph}
           variant="contained"
         >
