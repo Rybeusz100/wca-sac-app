@@ -17,6 +17,7 @@ async fn get_graph(
 
     let file_path = format!("../WCA_SAC/SAC_graph_{}.png", graph_type);
 
+    // TODO cache
     if let Ok(file) = NamedFile::open_async(&file_path).await {
         Ok(file)
     } else {
@@ -36,4 +37,9 @@ async fn get_graph(
 #[get("/events")]
 async fn get_events() -> impl Responder {
     NamedFile::open_async("./assets/events.json").await
+}
+
+#[get("/continents")]
+async fn get_continents() -> impl Responder {
+    NamedFile::open_async("./assets/continents.json").await
 }

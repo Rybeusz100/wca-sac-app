@@ -44,12 +44,13 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
 
     wca_export_job().await;
-    let wca_export_job_scheduler = JobScheduler::new().await.unwrap();
-    wca_export_job_scheduler
+
+    let job_scheduler = JobScheduler::new().await.unwrap();
+    job_scheduler
         .add(Job::new_async("0 0 0 * * Tue", |_, _| Box::pin(wca_export_job())).unwrap())
         .await
         .unwrap();
-    wca_export_job_scheduler.start().await.unwrap();
+    job_scheduler.start().await.unwrap();
 
     let validator = web::Data::new(GraphTypeValidator::new());
 
@@ -60,6 +61,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(validator.clone())
             .service(services::get_graph)
             .service(services::get_events)
+            .service(services::get_continents)
     })
     .bind(("0.0.0.0", port))?
     .run()

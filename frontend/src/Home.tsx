@@ -17,24 +17,44 @@ function Home() {
   const [events, setEvents] = useState({} as Record<string, string>);
   const areEventsLoading = useRef(false);
 
+  const [continents, setContinents] = useState({} as Record<string, string>);
+  const areContinentsLoading = useRef(false);
+
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedResultType, setSelectedResultType] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
 
   useEffect(() => {
     if (!areEventsLoading.current && !Object.keys(events).length) {
       areEventsLoading.current = true;
       fetch(`${API_URL}/events`)
         .then((res) => res.json())
-        .then((data: Record<string, string>) => setEvents(data))
+        .then(setEvents)
         .finally(() => {
           areEventsLoading.current = false;
+        });
+    }
+
+    if (!areContinentsLoading.current && !Object.keys(continents).length) {
+      areContinentsLoading.current = true;
+      fetch(`${API_URL}/continents`)
+        .then((res) => res.json())
+        .then(setContinents)
+        .finally(() => {
+          areContinentsLoading.current = false;
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function goToGraph() {
-    navigate(`/graph/${selectedEvent}_${selectedResultType}`);
+    let path = `/graph/${selectedEvent}_${selectedResultType}`;
+
+    if (selectedRegion) {
+      path += `_${selectedRegion}`;
+    }
+
+    navigate(path);
   }
 
   return (
@@ -69,6 +89,23 @@ function Home() {
             <MenuItem value="A">Average</MenuItem>
           </Select>
         </FormControl>
+        <FormControl>
+          <InputLabel id="region-select-label">Region (optional)</InputLabel>
+          <Select
+            id="region-select"
+            labelId="region-select-label"
+            label="Region (optional)"
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value as string)}
+          >
+            {Object.entries(continents).map(([id, name]) => (
+              <MenuItem key={id} value={id}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <Button
           disabled={!selectedEvent || !selectedResultType}
           onClick={goToGraph}
