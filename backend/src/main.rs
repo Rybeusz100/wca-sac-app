@@ -62,6 +62,7 @@ async fn main() -> std::io::Result<()> {
             .service(services::get_graph)
             .service(services::get_events)
             .service(services::get_continents)
+            .service(services::get_countries)
     })
     .bind(("0.0.0.0", port))?
     .run()

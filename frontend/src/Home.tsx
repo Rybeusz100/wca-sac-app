@@ -5,6 +5,7 @@ import {
   Container,
   FormControl,
   InputLabel,
+  ListSubheader,
   MenuItem,
   Select,
   Stack,
@@ -19,6 +20,9 @@ function Home() {
 
   const [continents, setContinents] = useState({} as Record<string, string>);
   const areContinentsLoading = useRef(false);
+
+  const [countries, setCountries] = useState({} as Record<string, string>);
+  const areCountriesLoading = useRef(false);
 
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedResultType, setSelectedResultType] = useState("");
@@ -42,6 +46,16 @@ function Home() {
         .then(setContinents)
         .finally(() => {
           areContinentsLoading.current = false;
+        });
+    }
+
+    if (!areCountriesLoading.current && !Object.keys(countries).length) {
+      areCountriesLoading.current = true;
+      fetch(`${API_URL}/countries`)
+        .then((res) => res.json())
+        .then(setCountries)
+        .finally(() => {
+          areCountriesLoading.current = false;
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +103,11 @@ function Home() {
             <MenuItem value="A">Average</MenuItem>
           </Select>
         </FormControl>
-        <FormControl>
+        <FormControl
+          disabled={
+            !Object.keys(continents).length && !Object.keys(countries).length
+          }
+        >
           <InputLabel id="region-select-label">Region (optional)</InputLabel>
           <Select
             id="region-select"
@@ -98,7 +116,15 @@ function Home() {
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value as string)}
           >
+            <ListSubheader>Continent</ListSubheader>
             {Object.entries(continents).map(([id, name]) => (
+              <MenuItem key={id} value={id}>
+                {name}
+              </MenuItem>
+            ))}
+
+            <ListSubheader>Country</ListSubheader>
+            {Object.entries(countries).map(([id, name]) => (
               <MenuItem key={id} value={id}>
                 {name}
               </MenuItem>

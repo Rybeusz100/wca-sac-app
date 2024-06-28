@@ -1,5 +1,5 @@
 use actix_files::NamedFile;
-use actix_web::{get, web, Responder};
+use actix_web::{get, web, HttpResponse, Responder};
 use log::{error, info};
 
 use crate::{graph_type_validator::GraphTypeValidator, wca_sac::generate_graph};
@@ -42,4 +42,10 @@ async fn get_events() -> impl Responder {
 #[get("/continents")]
 async fn get_continents() -> impl Responder {
     NamedFile::open_async("./assets/continents.json").await
+}
+
+#[get("/countries")]
+async fn get_countries(validator: web::Data<GraphTypeValidator>) -> impl Responder {
+    let countries = validator.countries();
+    HttpResponse::Ok().json(countries)
 }
