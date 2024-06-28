@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { API_URL } from "./constants";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  Button,
+  Container,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
+  const navigate = useNavigate();
+
   const [events, setEvents] = useState({} as Record<string, string>);
   const areEventsLoading = useRef(false);
 
@@ -21,29 +32,38 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function goToGraph() {
+    navigate(`/graph/${selectedEvent}_A`);
+  }
+
   return (
-    <>
-      <FormControl
-        style={{
-          width: 100,
-        }}
-      >
-        <InputLabel id="event-select-label">Event</InputLabel>
-        <Select
-          id="event-select"
-          labelId="event-select-label"
-          label="Event"
-          value={selectedEvent}
-          onChange={(e) => setSelectedEvent(e.target.value as string)}
+    <Container maxWidth="xs">
+      <Stack spacing={1} mt={2}>
+        <FormControl fullWidth>
+          <InputLabel id="event-select-label">Event</InputLabel>
+          <Select
+            id="event-select"
+            labelId="event-select-label"
+            label="Event"
+            value={selectedEvent}
+            onChange={(e) => setSelectedEvent(e.target.value as string)}
+          >
+            {Object.entries(events).map(([id, name]) => (
+              <MenuItem key={id} value={id}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button
+          disabled={!selectedEvent}
+          onClick={goToGraph}
+          variant="contained"
         >
-          {Object.entries(events).map(([id, name]) => (
-            <MenuItem key={id} value={id}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </>
+          Generate graph
+        </Button>
+      </Stack>
+    </Container>
   );
 }
 
