@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { API_URL } from "./constants";
 import {
   Button,
@@ -11,9 +11,13 @@ import {
   Stack,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { ActiveSelectionContext } from "./App";
 
 function Home() {
   const navigate = useNavigate();
+  const { activeSelection, setActiveSelection } = useContext(
+    ActiveSelectionContext
+  );
 
   const [events, setEvents] = useState({} as Record<string, string>);
   const areEventsLoading = useRef(false);
@@ -23,10 +27,6 @@ function Home() {
 
   const [countries, setCountries] = useState({} as Record<string, string>);
   const areCountriesLoading = useRef(false);
-
-  const [selectedEvent, setSelectedEvent] = useState("");
-  const [selectedResultType, setSelectedResultType] = useState("");
-  const [selectedRegion, setSelectedRegion] = useState("");
 
   useEffect(() => {
     if (!areEventsLoading.current && !Object.keys(events).length) {
@@ -62,10 +62,10 @@ function Home() {
   }, []);
 
   function goToGraph() {
-    let path = `/graph/${selectedEvent}_${selectedResultType}`;
+    let path = `/graph/${activeSelection.event}_${activeSelection.resultType}`;
 
-    if (selectedRegion) {
-      path += `_${selectedRegion}`;
+    if (activeSelection.region) {
+      path += `_${activeSelection.region}`;
     }
 
     navigate(path);
@@ -80,8 +80,13 @@ function Home() {
             id="event-select"
             labelId="event-select-label"
             label="Event"
-            value={selectedEvent}
-            onChange={(e) => setSelectedEvent(e.target.value as string)}
+            value={activeSelection.event}
+            onChange={(e) =>
+              setActiveSelection((prev) => ({
+                ...prev,
+                event: e.target.value,
+              }))
+            }
           >
             {Object.entries(events).map(([id, name]) => (
               <MenuItem key={id} value={id}>
@@ -96,8 +101,13 @@ function Home() {
             id="result-type-select"
             labelId="result-type-select-label"
             label="Result type"
-            value={selectedResultType}
-            onChange={(e) => setSelectedResultType(e.target.value as string)}
+            value={activeSelection.resultType}
+            onChange={(e) =>
+              setActiveSelection((prev) => ({
+                ...prev,
+                resultType: e.target.value,
+              }))
+            }
           >
             <MenuItem value="S">Single</MenuItem>
             <MenuItem value="A">Average</MenuItem>
@@ -113,8 +123,13 @@ function Home() {
             id="region-select"
             labelId="region-select-label"
             label="Region (optional)"
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value as string)}
+            value={activeSelection.region}
+            onChange={(e) =>
+              setActiveSelection((prev) => ({
+                ...prev,
+                region: e.target.value,
+              }))
+            }
           >
             <ListSubheader>Continent</ListSubheader>
             {Object.entries(continents)
@@ -137,7 +152,7 @@ function Home() {
         </FormControl>
 
         <Button
-          disabled={!selectedEvent || !selectedResultType}
+          disabled={!activeSelection.event || !activeSelection.resultType}
           onClick={goToGraph}
           variant="contained"
         >
