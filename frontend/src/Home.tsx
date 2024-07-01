@@ -11,7 +11,7 @@ import {
   Stack,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { ActiveSelectionContext } from "./App";
+import { ActiveSelectionContext } from "./context/activeSelection";
 
 function Home() {
   const navigate = useNavigate();
