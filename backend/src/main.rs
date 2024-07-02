@@ -4,6 +4,7 @@ use dotenv::dotenv;
 use graph_type_validator::GraphTypeValidator;
 use log::{error, info};
 use tokio_cron_scheduler::{Job, JobScheduler};
+use wca_sac::WcaSac;
 
 mod graph_type_validator;
 mod services;
@@ -54,12 +55,14 @@ async fn main() -> std::io::Result<()> {
     job_scheduler.start().await.unwrap();
 
     let validator = web::Data::new(GraphTypeValidator::new());
+    let wca_sac_instance = web::Data::new(WcaSac::new());
 
     HttpServer::new(move || {
         App::new()
             // TODO remember to change it
             .wrap(Cors::permissive())
             .app_data(validator.clone())
+            .app_data(wca_sac_instance.clone())
             .service(services::get_graph)
             .service(services::get_events)
             .service(services::get_continents)

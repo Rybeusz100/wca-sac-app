@@ -1,13 +1,13 @@
 use actix_files::NamedFile;
 use actix_web::{get, http::header, web, HttpResponse, Responder};
-use log::{error, info};
 
-use crate::{graph_type_validator::GraphTypeValidator, utils::sha256, wca_sac::generate_graph};
+use crate::{graph_type_validator::GraphTypeValidator, utils::sha256, wca_sac::WcaSac};
 
 #[get("/graph/{graph_type}")]
 async fn get_graph(
     path: web::Path<String>,
     validator: web::Data<GraphTypeValidator>,
+    wca_sac_instance: web::Data<WcaSac>,
 ) -> impl Responder {
     let graph_type = path.into_inner();
 
@@ -17,20 +17,13 @@ async fn get_graph(
 
     let file_path = format!("../WCA_SAC/SAC_graph_{}.png", graph_type);
 
-    // TODO cache
-    if let Ok(file) = NamedFile::open_async(&file_path).await {
-        Ok(file)
+    if wca_sac_instance.request_graph(&graph_type).await.is_ok() {
+        // TODO cache
+        Ok(NamedFile::open_async(&file_path).await)
     } else {
-        info!("Generating graph for {}", graph_type);
-        generate_graph(&graph_type).await.unwrap_or_else(|e| {
-            error!("Failed to generate graph: {}", e);
-        });
-        match NamedFile::open_async(file_path).await {
-            Ok(file) => Ok(file),
-            Err(_) => Err(actix_web::error::ErrorInternalServerError(
-                "Failed to generate graph",
-            )),
-        }
+        Err(actix_web::error::ErrorInternalServerError(
+            "Failed to generate graph",
+        ))
     }
 }
 
