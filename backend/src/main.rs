@@ -38,7 +38,7 @@ async fn wca_export_job() {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    pretty_env_logger::init();
+    pretty_env_logger::init_timed();
 
     let port = std::env::var("PORT")
         .unwrap_or_else(|_| "8000".to_string())
