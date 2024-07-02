@@ -9,6 +9,7 @@ import {
 import { WcaEvents, WcaEventsContext } from "./context/wcaEvents";
 import { API_URL } from "./constants";
 import { Continents, ContinentsContext } from "./context/continents";
+import { Countries, CountriesContext } from "./context/countries";
 
 function App() {
   const [activeSelection, setActiveSelection] = useState<ActiveSelection>({
@@ -20,6 +21,8 @@ function App() {
   const areWcaEventsLoading = useRef(false);
   const [continents, setContinents] = useState<Continents>({});
   const areContinentsLoading = useRef(false);
+  const [countries, setCountries] = useState<Countries>({});
+  const areCountriesLoading = useRef(false);
 
   useEffect(() => {
     if (!areWcaEventsLoading.current && !Object.keys(wcaEvents).length) {
@@ -42,6 +45,16 @@ function App() {
         });
     }
 
+    if (!areCountriesLoading.current && !Object.keys(countries).length) {
+      areCountriesLoading.current = true;
+      fetch(`${API_URL}/countries`)
+        .then((res) => res.json())
+        .then(setCountries)
+        .finally(() => {
+          areCountriesLoading.current = false;
+        });
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -51,12 +64,14 @@ function App() {
     >
       <WcaEventsContext.Provider value={wcaEvents}>
         <ContinentsContext.Provider value={continents}>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/graph/:graphType" element={<Graph />} />
-            </Routes>
-          </Router>
+          <CountriesContext.Provider value={countries}>
+            <Router>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/graph/:graphType" element={<Graph />} />
+              </Routes>
+            </Router>
+          </CountriesContext.Provider>
         </ContinentsContext.Provider>
       </WcaEventsContext.Provider>
     </ActiveSelectionContext.Provider>

@@ -1,5 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { API_URL } from "./constants";
+import { useContext } from "react";
 import {
   Button,
   Container,
@@ -14,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { ActiveSelectionContext } from "./context/activeSelection";
 import { WcaEventsContext } from "./context/wcaEvents";
 import { ContinentsContext } from "./context/continents";
+import { CountriesContext } from "./context/countries";
 
 function Home() {
   const navigate = useNavigate();
@@ -22,22 +22,7 @@ function Home() {
   );
   const wcaEvents = useContext(WcaEventsContext);
   const continents = useContext(ContinentsContext);
-
-  const [countries, setCountries] = useState({} as Record<string, string>);
-  const areCountriesLoading = useRef(false);
-
-  useEffect(() => {
-    if (!areCountriesLoading.current && !Object.keys(countries).length) {
-      areCountriesLoading.current = true;
-      fetch(`${API_URL}/countries`)
-        .then((res) => res.json())
-        .then(setCountries)
-        .finally(() => {
-          areCountriesLoading.current = false;
-        });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const countries = useContext(CountriesContext);
 
   function goToGraph() {
     let path = `/graph/${activeSelection.event}_${activeSelection.resultType}`;
