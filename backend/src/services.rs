@@ -1,6 +1,7 @@
 use actix_files::NamedFile;
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, http::header, web, HttpResponse, Responder};
 use log::{error, info};
+use sha2::{Digest, Sha256};
 
 use crate::{graph_type_validator::GraphTypeValidator, wca_sac::generate_graph};
 
@@ -47,5 +48,18 @@ async fn get_continents() -> impl Responder {
 #[get("/countries")]
 async fn get_countries(validator: web::Data<GraphTypeValidator>) -> impl Responder {
     let countries = validator.countries();
-    HttpResponse::Ok().json(countries)
+    let countries_json = serde_json::to_string(countries);
+
+    if let Ok(countries_json) = countries_json {
+        let mut hasher = Sha256::new();
+        hasher.update(countries_json);
+        let etag = format!("{:x}", hasher.finalize());
+
+        HttpResponse::Ok()
+            .insert_header((header::CACHE_CONTROL, "public, max-age=3600"))
+            .insert_header((header::ETAG, etag))
+            .json(countries)
+    } else {
+        HttpResponse::InternalServerError().finish()
+    }
 }
