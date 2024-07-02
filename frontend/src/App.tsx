@@ -7,9 +7,9 @@ import {
   ActiveSelection,
 } from "./context/activeSelection";
 import { WcaEvents, WcaEventsContext } from "./context/wcaEvents";
-import { API_URL } from "./constants";
 import { Continents, ContinentsContext } from "./context/continents";
 import { Countries, CountriesContext } from "./context/countries";
+import { setJsonStateFromApi } from "./utils";
 
 function App() {
   const [activeSelection, setActiveSelection] = useState<ActiveSelection>({
@@ -25,36 +25,24 @@ function App() {
   const areCountriesLoading = useRef(false);
 
   useEffect(() => {
-    if (!areWcaEventsLoading.current && !Object.keys(wcaEvents).length) {
-      areWcaEventsLoading.current = true;
-      fetch(`${API_URL}/events`)
-        .then((res) => res.json())
-        .then(setWcaEvents)
-        .finally(() => {
-          areWcaEventsLoading.current = false;
-        });
-    }
-
-    if (!areContinentsLoading.current && !Object.keys(continents).length) {
-      areContinentsLoading.current = true;
-      fetch(`${API_URL}/continents`)
-        .then((res) => res.json())
-        .then(setContinents)
-        .finally(() => {
-          areContinentsLoading.current = false;
-        });
-    }
-
-    if (!areCountriesLoading.current && !Object.keys(countries).length) {
-      areCountriesLoading.current = true;
-      fetch(`${API_URL}/countries`)
-        .then((res) => res.json())
-        .then(setCountries)
-        .finally(() => {
-          areCountriesLoading.current = false;
-        });
-    }
-
+    setJsonStateFromApi(
+      "/events",
+      wcaEvents,
+      setWcaEvents,
+      areWcaEventsLoading
+    );
+    setJsonStateFromApi(
+      "/continents",
+      continents,
+      setContinents,
+      areContinentsLoading
+    );
+    setJsonStateFromApi(
+      "/countries",
+      countries,
+      setCountries,
+      areCountriesLoading
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
