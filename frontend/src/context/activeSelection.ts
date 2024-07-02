@@ -1,14 +1,14 @@
 import { Dispatch, SetStateAction, createContext } from "react";
 
-export type ActiveSelectionType = {
+export type ActiveSelection = {
   event: string;
   resultType: string;
   region: string;
 };
 
 type ActiveSelectionContextType = {
-  activeSelection: ActiveSelectionType;
-  setActiveSelection: Dispatch<SetStateAction<ActiveSelectionType>>;
+  activeSelection: ActiveSelection;
+  setActiveSelection: Dispatch<SetStateAction<ActiveSelection>>;
 };
 
 export const ActiveSelectionContext = createContext<ActiveSelectionContextType>(
