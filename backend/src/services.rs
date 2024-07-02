@@ -1,9 +1,8 @@
 use actix_files::NamedFile;
 use actix_web::{get, http::header, web, HttpResponse, Responder};
 use log::{error, info};
-use sha2::{Digest, Sha256};
 
-use crate::{graph_type_validator::GraphTypeValidator, wca_sac::generate_graph};
+use crate::{graph_type_validator::GraphTypeValidator, utils::sha256, wca_sac::generate_graph};
 
 #[get("/graph/{graph_type}")]
 async fn get_graph(
@@ -51,9 +50,7 @@ async fn get_countries(validator: web::Data<GraphTypeValidator>) -> impl Respond
     let countries_json = serde_json::to_string(countries);
 
     if let Ok(countries_json) = countries_json {
-        let mut hasher = Sha256::new();
-        hasher.update(countries_json);
-        let etag = format!("{:x}", hasher.finalize());
+        let etag = sha256(countries_json);
 
         HttpResponse::Ok()
             .insert_header((header::CACHE_CONTROL, "public, max-age=3600"))

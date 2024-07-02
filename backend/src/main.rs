@@ -7,6 +7,7 @@ use tokio_cron_scheduler::{Job, JobScheduler};
 
 mod graph_type_validator;
 mod services;
+mod utils;
 mod wca_export;
 mod wca_sac;
 
