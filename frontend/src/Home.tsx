@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { ActiveSelectionContext } from "./context/activeSelection";
 import { WcaEventsContext } from "./context/wcaEvents";
+import { ContinentsContext } from "./context/continents";
 
 function Home() {
   const navigate = useNavigate();
@@ -20,24 +21,12 @@ function Home() {
     ActiveSelectionContext
   );
   const wcaEvents = useContext(WcaEventsContext);
-
-  const [continents, setContinents] = useState({} as Record<string, string>);
-  const areContinentsLoading = useRef(false);
+  const continents = useContext(ContinentsContext);
 
   const [countries, setCountries] = useState({} as Record<string, string>);
   const areCountriesLoading = useRef(false);
 
   useEffect(() => {
-    if (!areContinentsLoading.current && !Object.keys(continents).length) {
-      areContinentsLoading.current = true;
-      fetch(`${API_URL}/continents`)
-        .then((res) => res.json())
-        .then(setContinents)
-        .finally(() => {
-          areContinentsLoading.current = false;
-        });
-    }
-
     if (!areCountriesLoading.current && !Object.keys(countries).length) {
       areCountriesLoading.current = true;
       fetch(`${API_URL}/countries`)
