@@ -15,10 +15,9 @@ async fn get_graph(
         return Err(actix_web::error::ErrorNotFound("Invalid graph type"));
     }
 
-    let file_path = format!("../WCA_SAC/SAC_graph_{}.png", graph_type);
-
     if wca_sac_instance.request_graph(&graph_type).await.is_ok() {
         // TODO cache
+        let file_path = format!("../WCA_SAC/SAC_graph_{}.png", graph_type);
         Ok(NamedFile::open_async(&file_path).await)
     } else {
         Err(actix_web::error::ErrorInternalServerError(
