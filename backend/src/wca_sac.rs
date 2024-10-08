@@ -4,10 +4,11 @@ use std::{
 };
 
 use anyhow::anyhow;
-use log::{debug, info};
+use log::info;
 use tokio::process::Command;
 
 pub struct WcaSac {
+    is_stopped: Arc<Mutex<bool>>,
     in_progress: Arc<Mutex<Vec<String>>>,
     generated_graphs: Arc<Mutex<Vec<String>>>,
 }
@@ -15,13 +16,41 @@ pub struct WcaSac {
 impl WcaSac {
     pub fn new() -> Self {
         Self {
+            is_stopped: Arc::new(Mutex::new(false)),
             in_progress: Arc::new(Mutex::new(vec![])),
             generated_graphs: Arc::new(Mutex::new(vec![])),
         }
     }
 
+    pub async fn stop(&self) {
+        info!("Stopping WcaSac instance");
+        *self.is_stopped.lock().unwrap() = true;
+        self.wait_until_in_progress_empty().await
+    }
+
+    pub fn start(&self) {
+        info!("Starting WcaSac instance");
+        *self.is_stopped.lock().unwrap() = false
+    }
+
+    fn is_stopped(&self) -> bool {
+        *self.is_stopped.lock().unwrap()
+    }
+
+    async fn wait_until_in_progress_empty(&self) {
+        if self.in_progress.lock().unwrap().len() > 0 {
+            tokio::time::sleep(Duration::from_secs(1)).await;
+            Box::pin(self.wait_until_in_progress_empty()).await
+        }
+    }
+
     pub async fn request_graph(&self, graph_type: &str) -> anyhow::Result<()> {
-        debug!("Requesting graph for {}", graph_type);
+        info!("Requested graph for {}", graph_type);
+
+        if self.is_stopped() {
+            info!("Generating graphs is currently stopped");
+            return Ok(());
+        }
 
         let is_in_progress = self
             .in_progress
@@ -35,20 +64,19 @@ impl WcaSac {
             .contains(&graph_type.to_string());
 
         if is_generated {
-            debug!("Graph for {} is already generated", graph_type);
+            info!("Graph for {} is already generated", graph_type);
             Ok(())
         } else if !is_in_progress {
-            debug!("Graph for {} is not generated, generating...", graph_type);
+            info!("Graph for {} is not generated, generating...", graph_type);
             self.generate_graph(graph_type).await
         } else {
-            debug!("Graph for {} is in progress, waiting...", graph_type);
+            info!("Graph for {} is in progress, waiting...", graph_type);
             tokio::time::sleep(Duration::from_secs(1)).await;
             Box::pin(self.request_graph(graph_type)).await
         }
     }
 
     async fn generate_graph(&self, graph_type: &str) -> anyhow::Result<()> {
-        info!("Generating graph for {}", graph_type);
         self.in_progress
             .lock()
             .unwrap()

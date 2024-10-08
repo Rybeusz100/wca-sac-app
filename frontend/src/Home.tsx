@@ -94,6 +94,7 @@ function Home() {
               }))
             }
           >
+            <MenuItem>World</MenuItem>
             <ListSubheader>Continent</ListSubheader>
             {Object.entries(continents)
               .sort((a, b) => a[1].localeCompare(b[1]))

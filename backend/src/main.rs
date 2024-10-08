@@ -12,7 +12,9 @@ mod utils;
 mod wca_export;
 mod wca_sac;
 
-async fn wca_export_job() {
+async fn wca_export_job(wca_sac_instance: web::Data<WcaSac>) {
+    wca_sac_instance.stop().await;
+
     if let Err(e) = wca_export::download_and_unzip("../WCA_SAC/data").await {
         error!("Failed to download and unzip WCA export: {}", e);
     } else {
@@ -33,6 +35,8 @@ async fn wca_export_job() {
         }
         info!("Removed old CSV and PNG files");
     }
+
+    wca_sac_instance.start();
 }
 
 #[actix_web::main]
@@ -45,17 +49,26 @@ async fn main() -> std::io::Result<()> {
         .parse()
         .unwrap();
 
-    wca_export_job().await;
+    let wca_sac_instance = web::Data::new(WcaSac::new());
+
+    wca_export_job(wca_sac_instance.clone()).await;
 
     let job_scheduler = JobScheduler::new().await.unwrap();
-    job_scheduler
-        .add(Job::new_async("0 0 0 * * Tue", |_, _| Box::pin(wca_export_job())).unwrap())
-        .await
-        .unwrap();
+    {
+        let wca_sac_instance = wca_sac_instance.clone();
+        job_scheduler
+            .add(
+                Job::new_async("0 0 0 * * Tue", move |_, _| {
+                    Box::pin(wca_export_job(wca_sac_instance.clone()))
+                })
+                .unwrap(),
+            )
+            .await
+            .unwrap();
+    }
     job_scheduler.start().await.unwrap();
 
     let validator = web::Data::new(GraphTypeValidator::new());
-    let wca_sac_instance = web::Data::new(WcaSac::new());
 
     HttpServer::new(move || {
         App::new()
