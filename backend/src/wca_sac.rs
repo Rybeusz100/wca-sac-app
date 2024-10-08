@@ -25,7 +25,8 @@ impl WcaSac {
     pub async fn stop(&self) {
         info!("Stopping WcaSac instance");
         *self.is_stopped.lock().unwrap() = true;
-        self.wait_until_in_progress_empty().await
+        self.wait_until_in_progress_empty().await;
+        info!("Stopped WcaSac instance, in_progress is empty");
     }
 
     pub fn start(&self) {

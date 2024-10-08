@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use actix_files::NamedFile;
 use actix_web::{get, http::header, web, HttpResponse, Responder};
 
@@ -10,19 +12,17 @@ async fn get_graph(
     wca_sac_instance: web::Data<WcaSac>,
 ) -> impl Responder {
     let graph_type = path.into_inner();
+    let file_path = format!("../WCA_SAC/SAC_graph_{}.png", graph_type);
+    let file_path = Path::new(&file_path);
 
-    if !validator.validate(&graph_type) {
-        return Err(actix_web::error::ErrorNotFound("Invalid graph type"));
-    }
-
-    if wca_sac_instance.request_graph(&graph_type).await.is_ok() {
+    if validator.validate(&graph_type)
+        && wca_sac_instance.request_graph(&graph_type).await.is_ok()
+        && file_path.exists()
+    {
         // TODO cache
-        let file_path = format!("../WCA_SAC/SAC_graph_{}.png", graph_type);
-        Ok(NamedFile::open_async(&file_path).await)
+        NamedFile::open_async(&file_path).await
     } else {
-        Err(actix_web::error::ErrorInternalServerError(
-            "Failed to generate graph",
-        ))
+        NamedFile::open_async("./assets/error.gif").await
     }
 }
 
