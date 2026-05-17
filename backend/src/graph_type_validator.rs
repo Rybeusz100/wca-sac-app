@@ -18,7 +18,7 @@ impl GraphTypeValidator {
 
         // Countries
         let countries_data =
-            fs::read_to_string("../WCA_SAC/data/WCA_export_Countries.tsv").unwrap();
+            fs::read_to_string("../WCA_SAC/data/WCA_export_countries.tsv").unwrap();
         let mut reader = csv::ReaderBuilder::new()
             .delimiter(b'\t')
             .from_reader(countries_data.as_bytes());

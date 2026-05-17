@@ -72,7 +72,6 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            // TODO remember to change it
             .wrap(Cors::permissive())
             .app_data(validator.clone())
             .app_data(wca_sac_instance.clone())

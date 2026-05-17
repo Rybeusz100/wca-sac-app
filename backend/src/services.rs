@@ -19,7 +19,6 @@ async fn get_graph(
         && wca_sac_instance.request_graph(&graph_type).await.is_ok()
         && file_path.exists()
     {
-        // TODO cache
         NamedFile::open_async(&file_path).await
     } else {
         NamedFile::open_async("./assets/error.gif").await
